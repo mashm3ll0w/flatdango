@@ -5,32 +5,33 @@ document.addEventListener("DOMContentLoaded", () => {
   showFilms()
   loadFilm()
   document.getElementById("buy-ticket").addEventListener("click", buyTicket)
+  document.getElementById("films").addEventListener("click", deleteFilm)
 })
 
 function loadFilm(id = 1){
   fetch(`${baseURL}/${id}`)
   .then(res => res.json())
   .then(film => {
-    populateData(film)
+    populateData.call(film)
   })
   .catch(error => console.log('Error: ', error.message))
 }
 
-function populateData(film){
-  document.getElementById("poster").src = film.poster
-  document.getElementById("poster").alt = film.title
-  document.getElementById("title").textContent = film.title
-  document.getElementById("title").dataset.id = film.id
-  document.getElementById("runtime").textContent = `${film.runtime} minutes`
-  document.getElementById("film-info").textContent = film.description
-  document.getElementById("showtime").textContent = film.showtime
-  document.getElementById("ticket-num").dataset.capacity = film.capacity
-  document.getElementById("ticket-num").dataset.sold = film.tickets_sold
-  document.getElementById("ticket-num").textContent = parseInt(film.capacity - film.tickets_sold)
-  if (film.capacity - film.tickets_sold === 0){
+function populateData(){
+  document.getElementById("poster").src = this.poster
+  document.getElementById("poster").alt = this.title
+  document.getElementById("title").textContent = this.title
+  document.getElementById("title").dataset.id = this.id
+  document.getElementById("runtime").textContent = `${this.runtime} minutes`
+  document.getElementById("film-info").textContent = this.description
+  document.getElementById("showtime").textContent = this.showtime
+  document.getElementById("ticket-num").dataset.capacity = this.capacity
+  document.getElementById("ticket-num").dataset.sold = this.tickets_sold
+  document.getElementById("ticket-num").textContent = parseInt(this.capacity - this.tickets_sold)
+  if (this.capacity - this.tickets_sold === 0){
     document.getElementById("buy-ticket").disabled = true
     document.getElementById("buy-ticket").textContent = "Sold Out"
-    document.querySelector(`#films [data-id="${film.id}"]`).classList.add("sold-out")
+    document.querySelector(`#films [data-id="${this.id}"]`).classList.add("sold-out")
   }
   else{
     document.getElementById("buy-ticket").disabled = false
@@ -41,26 +42,28 @@ function populateData(film){
 function showFilms(){
   fetch(baseURL)
   .then(res => res.json())
-  .then(films => renderMenu(films))
+  .then(films => renderMenu.call(films))
   .catch(error => console.log("Error: ", error.message))
 }
 
-function renderMenu(films){
+function renderMenu(){
   const ul = document.getElementById("films")
   ul.innerHTML = ""
 
-  films.map(film => {
+  this.map(film => {
     const li = document.createElement("li")
+    const span = document.createElement("span")
     if (film.capacity - film.tickets_sold === 0){
       li.classList.add("sold-out")
     }
-
+    span.innerHTML = `  <button class="delete-film" class="mini compact circular icon ui red button">X</button>`
     li.addEventListener("click", () => {
       loadFilm(film.id)
     })
     li.textContent = film.title
     li.dataset.id = film.id
     li.classList.add("film")
+    li.appendChild(span)
     ul.appendChild(li)
   })
 }
@@ -83,4 +86,19 @@ function buyTicket(){
   .then(res => res.json())
   .then(film => loadFilm(film.id))
   .catch(error => console.log("Error: ", error.message))
+}
+
+function deleteFilm(e){
+  if(e.target.classList.contains("delete-film")){
+    fetch(`${baseURL}/${e.target.parentNode.parentNode.dataset.id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      }
+    })
+    .then(res => res.json())
+    .then(data => data)
+    .catch(error => console.log("Error: ", error.message))
+  }
 }
