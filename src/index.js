@@ -45,6 +45,9 @@ function renderMenu(films){
   
   films.map(film => {
     const li = document.createElement("li")
+    li.addEventListener("click", () => {
+      loadFilm(film.id)
+    })
     li.textContent = film.title
     li.dataset.id = film.id
     li.classList.add("film")
