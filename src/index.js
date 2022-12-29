@@ -58,7 +58,7 @@ function renderMenu(){
     if (film.capacity - film.tickets_sold === 0){
       li.classList.add("sold-out")
     }
-    span.innerHTML = `  <button class="delete-film" class="mini compact circular icon ui red button">X</button>`
+    span.innerHTML = `  <button class="delete-film mini compact circular icon ui red button">X</button>`
     li.addEventListener("click", () => {
       loadFilm(film.id)
     })
