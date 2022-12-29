@@ -2,8 +2,8 @@
 const baseURL = "http://localhost:3000/films"
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadFilm()
   showFilms()
+  loadFilm()
   document.getElementById("buy-ticket").addEventListener("click", buyTicket)
 })
 
@@ -28,7 +28,13 @@ function populateData(film){
   document.getElementById("ticket-num").dataset.sold = film.tickets_sold
   document.getElementById("ticket-num").textContent = parseInt(film.capacity - film.tickets_sold)
   if (film.capacity - film.tickets_sold === 0){
+    document.getElementById("buy-ticket").disabled = true
+    document.getElementById("buy-ticket").textContent = "Sold Out"
     document.querySelector(`#films [data-id="${film.id}"]`).classList.add("sold-out")
+  }
+  else{
+    document.getElementById("buy-ticket").disabled = false
+    document.getElementById("buy-ticket").textContent = "Buy Ticket"
   }
 }
 
@@ -42,9 +48,13 @@ function showFilms(){
 function renderMenu(films){
   const ul = document.getElementById("films")
   ul.innerHTML = ""
-  
+
   films.map(film => {
     const li = document.createElement("li")
+    if (film.capacity - film.tickets_sold === 0){
+      li.classList.add("sold-out")
+    }
+
     li.addEventListener("click", () => {
       loadFilm(film.id)
     })
@@ -59,13 +69,18 @@ function buyTicket(){
   let ticketsContainer = document.getElementById("ticket-num")
   const capacity = parseInt(ticketsContainer.dataset.capacity)
   let ticketsSold = parseInt(ticketsContainer.dataset.sold)
-  ticketsContainer.textContent -= 1
-  ticketsSold += 1
-  document.getElementById("ticket-num").dataset.sold = ticketsSold
-
-  if(capacity - ticketsSold === 0){
-    document.getElementById("buy-ticket").disabled = true
-    document.getElementById("buy-ticket").textContent = "Sold Out"
-    document.querySelector(`#films [data-id="${document.getElementById("title").dataset.id}"]`).classList.add("sold-out")
-  }
+  const filmID = document.getElementById("title").dataset.id
+  fetch(`${baseURL}/${filmID}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify({
+      tickets_sold: ticketsSold + 1
+    })
+  })
+  .then(res => res.json())
+  .then(film => loadFilm(film.id))
+  .catch(error => console.log("Error: ", error.message))
 }
