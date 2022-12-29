@@ -3,12 +3,11 @@ const baseURL = "http://localhost:3000/films"
 
 document.addEventListener("DOMContentLoaded", () => {
   showFilms()
-  loadFilm()
   document.getElementById("buy-ticket").addEventListener("click", buyTicket)
   document.getElementById("films").addEventListener("click", deleteFilm)
 })
 
-function loadFilm(id = 1){
+function loadFilm(id){
   fetch(`${baseURL}/${id}`)
   .then(res => res.json())
   .then(film => {
@@ -42,7 +41,10 @@ function populateData(){
 function showFilms(){
   fetch(baseURL)
   .then(res => res.json())
-  .then(films => renderMenu.call(films))
+  .then(films => {
+    renderMenu.call(films)
+    populateData.call(films[0])
+  })
   .catch(error => console.log("Error: ", error.message))
 }
 
