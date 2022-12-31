@@ -100,7 +100,7 @@ function deleteFilm(e){
       }
     })
     .then(res => res.json())
-    .then(data => data)
+    .then(data => showFilms())
     .catch(error => console.log("Error: ", error.message))
   }
 }
